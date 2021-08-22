@@ -3,6 +3,9 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
 const nodemailer = require("nodemailer");
+const { PrismaClient, Prisma } = require("@prisma/client");
+
+const prisma = new PrismaClient();
 
 const createTokens = async (user, secret) => {
   const createToken = jwt.sign(
@@ -38,7 +41,23 @@ const sendMail = async (to, subject, content) => {
   });
 };
 
+const addUserToRole = async (userId, RoleName) => {
+  const role = await prisma.roles.findFirst({
+    where: {
+      Name: RoleName,
+    },
+  });
+  // add user to role
+  const userToRole = await prisma.user_role.create({
+    data: {
+      idUser: userId,
+      IdRole: role.Id,
+    },
+  });
+};
+
 module.exports = {
   createTokens: createTokens,
   sendMail: sendMail,
+  addUserToRole: addUserToRole,
 };

@@ -62,7 +62,7 @@ model rationgs {
 
 model roles {
   Id          Int         @id @default(autoincrement())
-  Name        String?     @db.VarChar(45)
+  Name        String?     @unique @db.VarChar(45)
   Description String?     @db.VarChar(150)
   user_role   user_role[]
 }
@@ -87,8 +87,7 @@ model users {
   Email            String          @unique @db.VarChar(100)
   PasswordHash     String?         @db.VarChar(500)
   AccountConfirmed Int?            @default(0) @db.TinyInt
-  Avatar           String?         @db.VarChar(450)
-  userscol         String          @default("default-avatare.jpd") @db.VarChar(45)
+  Avatar           String?         @default("Achraf Fawzi") @db.VarChar(450)
   announcements    announcements[]
   favorite         favorite[]
   feedback         feedback[]

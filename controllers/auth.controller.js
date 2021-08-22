@@ -1,7 +1,7 @@
 const { PrismaClient, Prisma } = require("@prisma/client");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { createTokens, sendMail } = require("../utility/auth");
+const { createTokens, sendMail, addUserToRole } = require("../utility/auth");
 
 const saltRounds = 10;
 const prisma = new PrismaClient();
@@ -12,6 +12,11 @@ const authController = {
     const user = await prisma.users.findUnique({
       where: {
         Email: req.body.email,
+      },
+    });
+    const userRole = await prisma.user_role.findUnique({
+      where: {
+        idUser_IdRole: user.Id,
       },
     });
     if (!user) {
@@ -57,6 +62,7 @@ const authController = {
             PasswordHash: hash,
           };
           const createUser = await prisma.users.create({ data: user });
+          addUserToRole(createUser.Id, req.body.role);
 
           const [token] = await createTokens(createUser, process.env.SECRET);
           const confimAccountHref = `http://localhost:${process.env.PORT}/auth/confirm/${token}`;
