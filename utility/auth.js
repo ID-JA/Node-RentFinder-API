@@ -8,9 +8,10 @@ const { PrismaClient, Prisma } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 const createTokens = async (user, secret) => {
+  console.log(user);
   const createToken = jwt.sign(
     {
-      user: _.pick(user, ["Id", "UserName"]),
+      user: _.pick(user, ["Id", "UserName", "role"]),
     },
     secret,
     {
@@ -56,8 +57,23 @@ const addUserToRole = async (userId, RoleName) => {
   });
 };
 
+/**
+ * * Get ROLE for authenticated user
+ * @param {number} roleId role id of authenticated user
+ * @returns {Promise} Promise object represents the Role Name
+ */
+const getUserRole = async (roleId) => {
+  const role = await prisma.roles.findFirst({
+    where: {
+      Id: roleId,
+    },
+  });
+  return role.Name;
+};
+
 module.exports = {
   createTokens: createTokens,
   sendMail: sendMail,
   addUserToRole: addUserToRole,
+  getUserRole: getUserRole,
 };

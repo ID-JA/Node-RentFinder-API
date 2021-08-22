@@ -74,7 +74,8 @@ model user_role {
   users  users @relation(fields: [idUser], references: [Id])
 
   @@id([idUser, IdRole])
-  @@index([IdRole], name: "IdRole_idx")
+  @@index([IdRole], name: "user_role_ibfk_1_idx")
+  @@index([idUser], name: "user_role_ibfk_2_idx")
 }
 
 model users {

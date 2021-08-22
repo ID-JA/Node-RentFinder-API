@@ -1,7 +1,12 @@
 const { PrismaClient, Prisma } = require("@prisma/client");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { createTokens, sendMail, addUserToRole } = require("../utility/auth");
+const {
+  createTokens,
+  sendMail,
+  addUserToRole,
+  getUserRole,
+} = require("../utility/auth");
 
 const saltRounds = 10;
 const prisma = new PrismaClient();
@@ -14,17 +19,18 @@ const authController = {
         Email: req.body.email,
       },
     });
-    const userRole = await prisma.user_role.findUnique({
+    const userRole = await prisma.user_role.findFirst({
       where: {
-        idUser_IdRole: user.Id,
+        idUser: user.Id,
       },
     });
+    console.log(userRole.IdRole);
     if (!user) {
       return res.status(400).json({
         message: "Invalid Login",
       });
     }
-
+    // check if account confirmed
     if (!user.AccountConfirmed) {
       return res.status(401).json({
         message: "Please confirm your email to login",
@@ -37,7 +43,11 @@ const authController = {
         message: "Invalid Login",
       });
     }
-    const [token] = await createTokens(user, process.env.SECRET);
+    const authenticatedUser = {
+      ...user,
+      role: await getUserRole(userRole.IdRole),
+    };
+    const [token] = await createTokens(authenticatedUser, process.env.SECRET);
     res.status(200).json({
       token: token,
     });
