@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model announcements {
+  Id               Int        @id @default(autoincrement())
+  Title            String?    @db.VarChar(60)
+  Description      String?    @db.VarChar(800)
+  Photos           String?    @db.VarChar(1000)
+  Price            Float?     @db.Float
+  Location         String?    @db.VarChar(45)
+  TotalFloors      Int?
+  TotalBathrooms   Int?
+  TotalLivingrooms Int?
+  TotalKitchens    Int?
+  TotalBedrooms    Int?
+  Surface          Int?
+  IsAvailable      Int?       @db.TinyInt
+  UserId           Int?
+  users            users?     @relation(fields: [UserId], references: [Id])
+  favorite         favorite[]
+  rationgs         rationgs[]
+
+  @@index([UserId], name: "FK_Announcement_User_idx")
+}
+
+model favorite {
+  UserId         Int
+  AnnouncementId Int
+  announcements  announcements @relation(fields: [AnnouncementId], references: [Id])
+  users          users         @relation(fields: [UserId], references: [Id])
+
+  @@id([UserId, AnnouncementId])
+  @@index([AnnouncementId], name: "FK_Favorite_Announcement_idx")
+}
+
+model feedback {
+  Id      Int     @id @default(autoincrement())
+  Content String? @db.VarChar(500)
+  Value   Int?
+  UserId  Int?
+  users   users?  @relation(fields: [UserId], references: [Id])
+
+  @@index([UserId], name: "FK_FeedBack_User_idx")
+}
+
+model rationgs {
+  UserId         Int
+  AnnouncementId Int
+  Value          Int?
+  announcements  announcements @relation(fields: [AnnouncementId], references: [Id])
+  users          users         @relation(fields: [UserId], references: [Id])
+
+  @@id([UserId, AnnouncementId])
+  @@index([AnnouncementId], name: "FK_Ratings_Announcement_idx")
+}
+
+model roles {
+  Id          Int         @id @default(autoincrement())
+  Name        String?     @db.VarChar(45)
+  Description String?     @db.VarChar(150)
+  user_role   user_role[]
+}
+
+model user_role {
+  idUser Int
+  IdRole Int
+  roles  roles @relation(fields: [IdRole], references: [Id])
+  users  users @relation(fields: [idUser], references: [Id])
+
+  @@id([idUser, IdRole])
+  @@index([IdRole], name: "IdRole_idx")
+}
+
+model users {
+  Id               Int             @id @default(autoincrement())
+  FirstName        String          @db.VarChar(45)
+  LastName         String          @db.VarChar(45)
+  PhoneNumber      String?         @db.VarChar(28)
+  City             String          @db.VarChar(80)
+  UserName         String          @db.VarChar(50)
+  Email            String          @unique @db.VarChar(100)
+  PasswordHash     String?         @db.VarChar(500)
+  AccountConfirmed Int?            @default(0) @db.TinyInt
+  Avatar           String?         @db.VarChar(450)
+  userscol         String          @default("default-avatare.jpd") @db.VarChar(45)
+  announcements    announcements[]
+  favorite         favorite[]
+  feedback         feedback[]
+  rationgs         rationgs[]
+  user_role        user_role[]
+}
