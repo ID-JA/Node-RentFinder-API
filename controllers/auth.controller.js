@@ -6,13 +6,14 @@ const {
   sendMail,
   addUserToRole,
   getUserRole,
+  decodedToken,
 } = require("../utility/auth");
 
 const saltRounds = 10;
 const prisma = new PrismaClient();
 
 const authController = {
-  // ! =============================== LOG_IN =====================================
+  // ! =============================== LOG_IN ==============================================
   async login(req, res) {
     const user = await prisma.users.findUnique({
       where: {
@@ -24,7 +25,6 @@ const authController = {
         idUser: user.Id,
       },
     });
-    console.log(userRole.IdRole);
     if (!user) {
       return res.status(400).json({
         message: "Invalid Login",
@@ -36,7 +36,6 @@ const authController = {
         message: "Please confirm your email to login",
       });
     }
-
     const valid = await bcrypt.compare(req.body.password, user.PasswordHash);
     if (!valid) {
       return res.status(400).json({
@@ -45,14 +44,15 @@ const authController = {
     }
     const authenticatedUser = {
       ...user,
-      role: await getUserRole(userRole.IdRole),
+      role: await getUserRole(userRole.idUser),
     };
     const [token] = await createTokens(authenticatedUser, process.env.SECRET);
     res.status(200).json({
       token: token,
     });
   },
-  // ! =============================== SIGN_UP =====================================
+
+  // ! =============================== SIGN_UP =============================================
   async singup(req, res) {
     bcrypt.hash(req.body.password, saltRounds, async function (err, hash) {
       if (err) {
@@ -87,7 +87,7 @@ const authController = {
               });
             })
             .catch((error) => {
-              console.log(error);
+              // console.log(error);
               return res.status(400).json({
                 message: res,
               });
@@ -107,12 +107,13 @@ const authController = {
     });
   },
 
+  // ! =============================== CONFIRM_ACCOUNT =====================================
   async confirmAccount(req, res) {
     let encodedToken = req.params.token;
-    console.log(encodedToken);
+    // console.log(encodedToken);
     try {
       const decodedToken = jwt.verify(encodedToken, process.env.SECRET);
-      console.log(decodedToken);
+      // console.log(decodedToken);
       const updateUser = await prisma.users.update({
         where: {
           Id: decodedToken.user.Id,
@@ -126,6 +127,99 @@ const authController = {
     }
 
     return res.redirect("http://localhost:3001/login");
+  },
+
+  // ! =============================== FORGET PASSWORD =====================================
+  async forgetPassword(req, res) {
+    const userEmail = req.body.email;
+    // TODO: Search for the user with Email we got from request
+    const user = await prisma.users.findUnique({
+      where: {
+        Email: userEmail,
+      },
+    });
+    if (!user) {
+      return res.status(400).json({
+        message: "invalid Email",
+      });
+    }
+    const authenticatedUser = {
+      ...user,
+      role: await getUserRole(user.Id),
+    };
+    const token = await createTokens(authenticatedUser, process.env.SECRET);
+    // console.log(token);
+    const href = `http://localhost:4000/auth/resetpassword?token=${token}`;
+    let message = `
+    <h1>Rest Password</h1>
+    <p>to change your password click <a href="${href}">HERE</a> and flow instruction 👌</p>
+    <p><strong>Sincerely ❤</strong></p>
+    `;
+    sendMail(user.Email, "Rest Password", message);
+    res.status(200).json({
+      message: "Check your inbox we send you an email to reset your password",
+    });
+  },
+
+  // ! =============================== RESET PASSWORD =====================================
+  async resetpassword(req, res) {
+    const token = req.query.token;
+    console.log(token);
+    const objData = {
+      newPassword: req.body.newPassword,
+      confirmNewPassword: req.body.confirmNewPassword,
+    };
+
+    if (objData.newPassword !== objData.confirmNewPassword) {
+      return res.status(400).json({
+        message: "confirm password does not match new password",
+      });
+    }
+    if (!token) {
+      return res.status(400).json({
+        message: "Invalid Token",
+      });
+    }
+    const validToken = decodedToken(token);
+    console.log(validToken);
+
+    if (validToken === "error") {
+      return res.status(400).json({
+        message: "Invalid Token",
+      });
+    }
+    // TODO: Find user after validation of the token
+    const user = await prisma.users.findUnique({
+      where: {
+        Id: validToken.user.Id,
+      },
+    });
+    console.log(user);
+    if (!user) {
+      return res.status(404).json({
+        message: "Accout doesn't exist anymore",
+      });
+    }
+    bcrypt.hash(objData.newPassword, saltRounds, async function (err, hash) {
+      // TODO: Change Old Password with New Password
+      const updatedUser = await prisma.users.update({
+        where: {
+          Id: user.Id,
+        },
+        data: {
+          PasswordHash: hash,
+        },
+      });
+      if (updatedUser) {
+        return res.status(201).json({
+          message: "your password has been change successfully !!! ",
+        });
+      } else {
+        return res.status(400).json({
+          message: "SomeThing Bad Happpened",
+        });
+      }
+    });
   },
 };
 

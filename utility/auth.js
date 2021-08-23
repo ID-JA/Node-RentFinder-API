@@ -58,17 +58,37 @@ const addUserToRole = async (userId, RoleName) => {
 };
 
 /**
- * * Get ROLE for authenticated user
- * @param {number} roleId role id of authenticated user
+ * * Get ROLE NAME for authenticated user
+ * @param {number} userId user id of authenticated user
  * @returns {Promise} Promise object represents the Role Name
  */
-const getUserRole = async (roleId) => {
+const getUserRole = async (userId) => {
+  const userRole = await prisma.user_role.findFirst({
+    where: {
+      idUser: userId,
+    },
+  });
   const role = await prisma.roles.findFirst({
     where: {
-      Id: roleId,
+      Id: userRole.IdRole,
     },
   });
   return role.Name;
+};
+
+/**
+ *
+ * @param {string} encodedToken encoded token from user
+ * @returns decoded token if token valid otherwise "error" if token invalid
+ */
+const decodedToken = (encodedToken) => {
+  console.log(encodedToken);
+  try {
+    const decoded = jwt.verify(encodedToken, process.env.SECRET);
+    return decoded;
+  } catch (err) {
+    return "error";
+  }
 };
 
 module.exports = {
@@ -76,4 +96,5 @@ module.exports = {
   sendMail: sendMail,
   addUserToRole: addUserToRole,
   getUserRole: getUserRole,
+  decodedToken: decodedToken,
 };
