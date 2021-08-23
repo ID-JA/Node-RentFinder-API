@@ -84,11 +84,39 @@ const getUserRole = async (userId) => {
 const decodedToken = (encodedToken) => {
   console.log(encodedToken);
   try {
-    const decoded = jwt.verify(encodedToken, process.env.SECRET);
+    const token = encodedToken.split(" ");
+    console.log(token.length);
+
+    const decoded = jwt.verify(
+      token.length === 2 ? token[1] : token[0],
+      process.env.SECRET
+    );
     return decoded;
   } catch (err) {
     return "error";
   }
+};
+
+/**
+ *
+ * @param {string} token token of authenticated user
+ * @returns Object User
+ */
+
+const getUserFromToken = async (token) => {
+  const validToken = decodedToken(token);
+  console.log(validToken);
+
+  if (validToken === "error") {
+    return "Invalid Token";
+  }
+  // TODO: Find user after validation of the token
+  const user = await prisma.users.findUnique({
+    where: {
+      Id: validToken.user.Id,
+    },
+  });
+  return user;
 };
 
 module.exports = {
@@ -97,4 +125,5 @@ module.exports = {
   addUserToRole: addUserToRole,
   getUserRole: getUserRole,
   decodedToken: decodedToken,
+  getUserFromToken: getUserFromToken,
 };

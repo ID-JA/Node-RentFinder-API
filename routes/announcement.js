@@ -4,6 +4,17 @@ const { authPage } = require("../middlewares/auth.middlewares");
 
 const router = express.Router();
 
-router.get("/", authPage(["seller"]), announcementController.all);
+router.get("/", announcementController.getAllAnnouncements);
+router.get(
+  "/mine",
+  authPage(["Seller"]),
+  announcementController.getAnnouncementsOfUser
+);
+router.get("/:Id", announcementController.getAnnouncementById);
+router.delete(
+  "/:Id/delete",
+  authPage(["Seller"]),
+  announcementController.deleteAnnouncement
+);
 
 module.exports = router;
