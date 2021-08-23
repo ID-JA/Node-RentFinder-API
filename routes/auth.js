@@ -2,6 +2,7 @@ const express = require("express");
 const authController = require("../controllers/auth.controller");
 const router = express.Router();
 
+// =============== Authentication ==========================
 router.post("/login", authController.login);
 router.post("/signup", authController.singup);
 router.post("/forgetpassword", authController.forgetPassword);
