@@ -17,4 +17,16 @@ router.delete(
   announcementController.deleteAnnouncement
 );
 
+router.put(
+  "/:Id/update",
+  authPage(["Seller"]),
+  announcementController.updateAnnouncement
+);
+
+router.post(
+  "/create",
+  authPage(["Seller"]),
+  announcementController.createAnnouncement
+);
+
 module.exports = router;

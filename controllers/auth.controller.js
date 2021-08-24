@@ -20,11 +20,7 @@ const authController = {
         Email: req.body.email,
       },
     });
-    const userRole = await prisma.user_role.findFirst({
-      where: {
-        idUser: user.Id,
-      },
-    });
+
     if (!user) {
       return res.status(400).json({
         message: "Invalid Login",
@@ -36,6 +32,12 @@ const authController = {
         message: "Please confirm your email to login",
       });
     }
+
+    const userRole = await prisma.user_role.findFirst({
+      where: {
+        idUser: user.Id,
+      },
+    });
     const valid = await bcrypt.compare(req.body.password, user.PasswordHash);
     if (!valid) {
       return res.status(400).json({
@@ -89,7 +91,7 @@ const authController = {
             .catch((error) => {
               // console.log(error);
               return res.status(400).json({
-                message: res,
+                message: error,
               });
             });
         } catch (error) {
