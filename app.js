@@ -2,6 +2,7 @@ const express = require("express");
 const announcementRoutes = require("./routes/announcement");
 const authRoutes = require("./routes/auth");
 const feedBackRoutes = require("./routes/feedback");
+const favoriteRoutes = require("./routes/favorite");
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
 const cors = require("cors");
@@ -33,5 +34,6 @@ app.use((error, req, res, next) => {
 app.use("/auth", authRoutes);
 app.use("/feedback", feedBackRoutes);
 app.use("/announcements", announcementRoutes);
+app.use("/favorite", favoriteRoutes);
 
 module.exports = app;
