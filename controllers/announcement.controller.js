@@ -98,7 +98,7 @@ const announcementController = {
           message: "something bad happened, Please try again !!!",
         });
       }
-      res.status(200).json({
+      return res.status(200).json({
         message: "Announcement has been deleted successfully !!! ",
       });
     } catch (error) {
@@ -239,6 +239,70 @@ const announcementController = {
       return res.status(400).json({
         message: message,
       });
+    }
+  },
+
+  // ! ================================ Rate Announcement ======================================
+  async rateAnnouncement(req, res) {
+    /**
+     * TODO:
+     * ? [x] Get AnnouncementId and UserId and Value From Request
+     * ? [x] search for user using token
+     * ? [x] search for announcement using AnnouncementId from request
+     */
+    const token =
+      req.body.token || req.query.token || req.headers.authorization;
+    console.log(token);
+
+    if (!token) {
+      return res.status(400).json({
+        message: "Invalid Token",
+      });
+    }
+
+    const user = await getUserFromToken(token);
+    // console.log(user);
+    if (user === "Invalid Token") {
+      return res.status(404).json({
+        message: "Accout doesn't exist anymore",
+      });
+    }
+
+    const announcementId = req.body.announcementId;
+
+    try {
+      const findedAnnouncement = await prisma.announcements.findFirst({
+        where: {
+          Id: parseInt(announcementId),
+        },
+      });
+
+      if (!findedAnnouncement) {
+        return res.status(400).json({
+          message:
+            "Announcemet with this id doesn't exist, Please try again !!!",
+        });
+      }
+      const objData = {
+        UserId: user.Id,
+        AnnouncementId: parseInt(announcementId),
+        Value: parseInt(req.body.value),
+      };
+      const ratedAnnouncement = await prisma.ratings.create({
+        data: {
+          ...objData,
+        },
+      });
+      if (!ratedAnnouncement) {
+        res.status(400).json({
+          message: "something bad happened, Please try again !!!",
+        });
+      }
+      return res.status(200).json({
+        message: "rate has been created successfully !!! ",
+      });
+    } catch (error) {
+      res.status(500).json(error);
     }
   },
 };

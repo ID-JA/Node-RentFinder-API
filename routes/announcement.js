@@ -28,5 +28,10 @@ router.post(
   authPage(["Seller"]),
   announcementController.createAnnouncement
 );
+router.post(
+  "/rate",
+  authPage(["Buyer"]),
+  announcementController.rateAnnouncement
+);
 
 module.exports = router;

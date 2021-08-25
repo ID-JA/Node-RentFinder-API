@@ -24,7 +24,7 @@ model announcements {
   UserId           Int
   users            users      @relation(fields: [UserId], references: [Id])
   favorite         favorite[]
-  rationgs         rationgs[]
+  ratings          ratings[]
 
   @@index([UserId], name: "FK_Announcement_User_idx")
 }
@@ -47,17 +47,6 @@ model feedback {
   users   users?  @relation(fields: [UserId], references: [Id])
 
   @@index([UserId], name: "FK_FeedBack_User_idx")
-}
-
-model rationgs {
-  UserId         Int
-  AnnouncementId Int
-  Value          Int?
-  announcements  announcements @relation(fields: [AnnouncementId], references: [Id])
-  users          users         @relation(fields: [UserId], references: [Id])
-
-  @@id([UserId, AnnouncementId])
-  @@index([AnnouncementId], name: "FK_Ratings_Announcement_idx")
 }
 
 model roles {
@@ -92,6 +81,17 @@ model users {
   announcements    announcements[]
   favorite         favorite[]
   feedback         feedback[]
-  rationgs         rationgs[]
+  ratings          ratings[]
   user_role        user_role[]
+}
+
+model ratings {
+  UserId         Int
+  AnnouncementId Int
+  Value          Int?
+  announcements  announcements @relation(fields: [AnnouncementId], references: [Id])
+  users          users         @relation(fields: [UserId], references: [Id])
+
+  @@id([UserId, AnnouncementId])
+  @@index([AnnouncementId], name: "FK_Ratings_Announcement_idx")
 }
