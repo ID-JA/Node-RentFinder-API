@@ -1,6 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
-const { Int32 } = require("mongodb");
-const { decodedToken, getUserFromToken } = require("../utility/auth");
+const { getUserFromToken } = require("../utility/auth");
 
 const prisma = new PrismaClient();
 
@@ -303,6 +302,66 @@ const announcementController = {
       });
     } catch (error) {
       res.status(500).json(error);
+    }
+  },
+
+  // ! ================================ Upload Images of Announcement =====================================
+  async uploadImages(req, res) {
+    try {
+      const token =
+        req.body.token || req.query.token || req.headers.authorization;
+
+      const user = await getUserFromToken(token);
+      console.log(user);
+      const param = req.params.announcementId;
+      console.log(param);
+      if (!user) {
+        return res.status(404).json({
+          message: "user not found",
+        });
+      }
+      if (!param) {
+        return res.status(400).json({
+          message: "faild while uploading images",
+        });
+      }
+      const findedAnnouncement = await prisma.announcements.findFirst({
+        where: {
+          Id: parseInt(param),
+          UserId: user.Id,
+        },
+      });
+      let filesName = "";
+      req.files.forEach((element) => {
+        filesName += element.filename + " ";
+      });
+      console.log(findedAnnouncement);
+      if (!findedAnnouncement) {
+        return res.status(404).json({
+          message: "announcement doesn't exist....",
+        });
+      }
+      const upadtedAnnouncement_Images = await prisma.announcements.update({
+        where: {
+          Id: findedAnnouncement.Id,
+        },
+        data: {
+          Photos: filesName,
+        },
+      });
+      if (!upadtedAnnouncement_Images) {
+        return res.status(400).json({
+          message: "upload images faild please try again ....",
+        });
+      }
+      return res.status(200).json({
+        message: "images has been uploaded successfully....",
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: "you should upload only 3 images",
+      });
     }
   },
 };

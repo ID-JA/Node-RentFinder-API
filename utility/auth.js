@@ -31,6 +31,9 @@ const sendMail = async (to, subject, content) => {
       user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_PASS,
     },
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
 
   // send mail with defined transport object
