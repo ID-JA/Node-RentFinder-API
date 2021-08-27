@@ -51,7 +51,23 @@ const announcementController = {
         message: "we couldn't find this announcement please try again !!!",
       });
     }
-    res.status(201).json(announcement);
+    const ownerId = announcement.UserId;
+    const owner = await prisma.users.findUnique({
+      where: {
+        Id: ownerId,
+      },
+    });
+    const ownerDTO = (({
+      PasswordHash,
+      AccountConfirmed,
+      Id,
+      UserName,
+      ...o
+    }) => o)(owner);
+    res.status(200).json({
+      announcement: { ...announcement },
+      houseOwner: { ...ownerDTO },
+    });
   },
 
   // ! =============================== DELETE ANNOUNCEMENT=====================================
@@ -194,7 +210,7 @@ const announcementController = {
       });
     }
     const user = await getUserFromToken(token);
-    // console.log(user);
+    console.log(user);
     if (!user) {
       return res.status(400).json({
         message: "Something bad happened !!",
@@ -212,7 +228,7 @@ const announcementController = {
       Location: req.body.location,
       Surface: req.body.surface,
       Price: req.body.price,
-      Photos: req.body.photos,
+      PublicationDate: new Date().toJSON().slice(0, 10).replace(/-/g, "/"),
       UserId: user.Id,
     };
     try {
@@ -222,8 +238,9 @@ const announcementController = {
         },
       });
       if (!createdAnnouncement) {
-        res.status(400);
-        throw new Error("Creation of announcement faild, please try again !!!");
+        return res.status(400).json({
+          message: "Creation of announcement faild, please try again !!!",
+        });
       }
       return res.status(200).json({
         message: "Announcement has been created successfully ",
@@ -232,11 +249,10 @@ const announcementController = {
       let message = "Something happened";
       if (error.code === "P2011") {
         message = error.meta.constraint + " is required";
-      } else if (error.code === "P2002") {
-        message = "Email Already Exist !!!";
       }
+
       return res.status(400).json({
-        message: message,
+        message: error,
       });
     }
   },

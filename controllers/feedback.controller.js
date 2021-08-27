@@ -26,11 +26,18 @@ const feedBackController = {
         });
       }
       try {
+        const user = await prisma.users.findUnique({
+          where: {
+            Id: validToken.user.Id,
+          },
+        });
         const createdFeedBack = await prisma.feedback.create({
           data: {
             Content: objData.Content,
             Value: objData.Value,
-            UserId: validToken.user.Id,
+            Avatar: user.Avatar,
+            FirstName: user.FirstName,
+            LastName: user.LastName,
           },
         });
         if (!createdFeedBack) {

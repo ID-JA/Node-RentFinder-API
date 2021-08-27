@@ -10,6 +10,11 @@ router.post(
   authPage(["Seller", "Buyer"]),
   favoriteController.createFavorite
 );
+router.get(
+  "/all",
+  authPage(["Seller", "Buyer"]),
+  favoriteController.getUserFavorite
+);
 router.delete(
   "/delete",
   authPage(["Seller", "Buyer"]),

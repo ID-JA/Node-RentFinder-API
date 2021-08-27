@@ -47,6 +47,30 @@ const favoriteController = {
     });
   },
 
+  async getUserFavorite(req, res) {
+    const token =
+      req.body.token || req.query.token || req.headers.authorization;
+
+    const user = await getUserFromToken(token);
+    if (!user) {
+      return res.status(404).json({
+        message: "user not found",
+      });
+    }
+    const allFavorites = await prisma.favorite.findMany({
+      where: {
+        UserId: user.Id,
+      },
+    });
+
+    const favoritesDTO = [];
+    for (let i = 0; i < allFavorites.length; i++) {
+      const element = allFavorites[i];
+      favoritesDTO.push((({ UserId, ...f }) => f)(element));
+    }
+    return res.status(200).json(favoritesDTO);
+  },
+
   async deleteFavorite(req, res) {
     const token =
       req.body.token || req.query.token || req.headers.authorization;

@@ -11,7 +11,7 @@ model announcements {
   Id               Int        @id @default(autoincrement())
   Title            String     @db.VarChar(60)
   Description      String     @db.VarChar(800)
-  Photos           String     @db.VarChar(1000)
+  Photos           String?    @db.VarChar(1000)
   Price            Float      @db.Float
   Location         String     @db.VarChar(45)
   TotalFloors      Int
@@ -21,6 +21,7 @@ model announcements {
   TotalBedrooms    Int
   Surface          Int
   IsAvailable      Int        @db.TinyInt
+  PublicationDate  String     @db.VarChar(50)
   UserId           Int
   users            users      @relation(fields: [UserId], references: [Id])
   favorite         favorite[]
