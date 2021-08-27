@@ -62,6 +62,8 @@ const announcementController = {
       AccountConfirmed,
       Id,
       UserName,
+      Email,
+      City,
       ...o
     }) => o)(owner);
     res.status(200).json({
@@ -228,7 +230,7 @@ const announcementController = {
       Location: req.body.location,
       Surface: req.body.surface,
       Price: req.body.price,
-      PublicationDate: new Date().toJSON().slice(0, 10).replace(/-/g, "/"),
+      PublicationDate: new Date().toJSON().slice(0, 10).replace(/-/g, "-"),
       UserId: user.Id,
     };
     try {
