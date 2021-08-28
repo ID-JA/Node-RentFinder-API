@@ -19,37 +19,37 @@ const router = express.Router();
 router.get("/", announcementController.getAllAnnouncements);
 router.get(
   "/mine",
-  authPage(["Seller"]),
+  authPage(["HouseOwner"]),
   announcementController.getAnnouncementsOfUser
 );
 router.get("/:Id", announcementController.getAnnouncementById);
 router.delete(
   "/:Id/delete",
-  authPage(["Seller"]),
+  authPage(["HouseOwner"]),
   announcementController.deleteAnnouncement
 );
 
 router.put(
   "/:Id/update",
-  authPage(["Seller"]),
+  authPage(["HouseOwner"]),
   announcementController.updateAnnouncement
 );
 
 router.post(
   "/create",
-  authPage(["Seller"]),
+  authPage(["HouseOwner"]),
   announcementController.createAnnouncement
 );
 router.post(
   "/rate",
-  authPage(["Buyer"]),
+  authPage(["User"]),
   announcementController.rateAnnouncement
 );
 
 router.put(
   "/create/:announcementId/images",
   upload.array("images", 3),
-  authPage(["Seller"]),
+  authPage(["HouseOwner"]),
   announcementController.uploadImages
 );
 

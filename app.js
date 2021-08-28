@@ -5,6 +5,7 @@ const feedBackRoutes = require("./routes/feedback");
 const profileRoutes = require("./routes/profile");
 const favoriteRoutes = require("./routes/favorite");
 const analyticsRoutes = require("./routes/analytics");
+const adminRoutes = require("./routes/admin");
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
 const cors = require("cors");
@@ -41,5 +42,6 @@ app.use("/announcements", announcementRoutes);
 app.use("/favorite", favoriteRoutes);
 app.use("/profile", profileRoutes);
 app.use("/analytics", analyticsRoutes);
+app.use("/admin", adminRoutes);
 
 module.exports = app;
