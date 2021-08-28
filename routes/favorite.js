@@ -7,17 +7,17 @@ const router = express.Router();
 // =============== FeedBack ==========================
 router.post(
   "/add",
-  authPage(["Seller", "Buyer"]),
+  authPage(["HouseOwner", "User"]),
   favoriteController.createFavorite
 );
 router.get(
   "/all",
-  authPage(["Seller", "Buyer"]),
+  authPage(["HouseOwner", "User"]),
   favoriteController.getUserFavorite
 );
 router.delete(
   "/delete",
-  authPage(["Seller", "Buyer"]),
+  authPage(["HouseOwner", "User"]),
   favoriteController.deleteFavorite
 );
 

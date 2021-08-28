@@ -7,7 +7,33 @@ const announcementController = {
   // ! =============================== GET ALL ANNOUNCEMENTS =====================================
   async getAllAnnouncements(req, res) {
     const allAnnouncements = await prisma.announcements.findMany();
-    res.status(200).json(allAnnouncements);
+
+    let nbrRate = 0;
+    let totalRate = 0;
+    let avgRate = 0;
+    const announcements = [];
+    if (allAnnouncements.length > 0) {
+      for (let indx = 0; indx < allAnnouncements.length; indx++) {
+        const announcement = allAnnouncements[indx];
+        const allRates = await prisma.ratings.findMany({
+          where: {
+            AnnouncementId: announcement.Id,
+          },
+        });
+
+        nbrRate = allRates.length;
+        for (let i = 0; i < allRates.length; i++) {
+          const element = allRates[i];
+          totalRate += element.Value;
+        }
+        avgRate = (totalRate / nbrRate).toFixed(1);
+        announcements.push({
+          ...announcement,
+          rate: avgRate,
+        });
+      }
+    }
+    res.status(200).json(announcements);
   },
 
   // ! =============================== GET ANNOUNCEMENT OF USER =====================================
@@ -66,8 +92,21 @@ const announcementController = {
       City,
       ...o
     }) => o)(owner);
+    let nbrRate = 0;
+    let totalRate = 0;
+    const allRates = await prisma.ratings.findMany({
+      where: {
+        AnnouncementId: announcement.Id,
+      },
+    });
+    nbrRate = allRates.length;
+    for (let i = 0; i < allRates.length; i++) {
+      const element = allRates[i];
+      totalRate += element.Value;
+    }
+    const avgRate = (totalRate / nbrRate).toFixed(1);
     res.status(200).json({
-      announcement: { ...announcement },
+      announcement: { ...announcement, rate: avgRate },
       houseOwner: { ...ownerDTO },
     });
   },
@@ -290,7 +329,7 @@ const announcementController = {
     try {
       const findedAnnouncement = await prisma.announcements.findFirst({
         where: {
-          Id: parseInt(announcementId),
+          Id: announcementId,
         },
       });
 
@@ -319,7 +358,13 @@ const announcementController = {
         message: "rate has been created successfully !!! ",
       });
     } catch (error) {
-      res.status(500).json(error);
+      let message = "";
+      if (error.code === "P2002") {
+        return res.status(500).json({
+          message: "you already rate this announcement...",
+        });
+      }
+      return res.status(500).json(message ? message : error);
     }
   },
 
