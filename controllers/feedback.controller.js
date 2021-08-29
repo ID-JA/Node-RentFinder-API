@@ -1,12 +1,32 @@
 const { PrismaClient } = require("@prisma/client");
-const { decodedToken } = require("../utility/auth");
+const { decodedToken, getUserFromToken } = require("../utility/auth");
 
 const prisma = new PrismaClient();
 
 const feedBackController = {
   async getAllFeedBack(req, res) {
+    const token =
+      req.body.token || req.query.token || req.headers.authorization;
+
+    const userInfo = await getUserFromToken(token);
+    // console.log(user);
+
     const feedbacks = await prisma.feedback.findMany();
-    return res.status(200).json(feedbacks);
+    const allFeedBacks = [];
+    const user = await prisma.users.findFirst({
+      where: {
+        Id: userInfo.Id,
+      },
+    });
+    for (let i = 0; i < feedbacks.length; i++) {
+      const element = feedbacks[i];
+      allFeedBacks.push({
+        ...element,
+        UserId: user.Id,
+        Avatar: user.Avatar,
+      });
+    }
+    return res.status(200).json(allFeedBacks);
   },
 
   async createNewFeedBack(req, res) {
