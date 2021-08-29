@@ -89,7 +89,6 @@ const announcementController = {
       Id,
       UserName,
       Email,
-      City,
       ...o
     }) => o)(owner);
     let nbrRate = 0;
