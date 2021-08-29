@@ -1,8 +1,10 @@
 const { PrismaClient } = require("@prisma/client");
 const { getUserFromToken } = require("../utility/auth");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const prisma = new PrismaClient();
-
+const saltRounds = 10;
 const profileController = {
   async getUserInfo(req, res) {
     /**
@@ -100,6 +102,71 @@ const profileController = {
         message: "change avatar faild please try again...",
       });
     }
+  },
+
+  async changePassword(req, res) {
+    const token =
+      req.body.token || req.query.token || req.headers.authorization;
+
+    if (!token) {
+      return res.status(401).json({
+        message: "Invalid Token",
+      });
+    }
+    const user = await getUserFromToken(token);
+    if (!user) {
+      return res.status(404).json({
+        message: "user not found",
+      });
+    }
+
+    const objData = {
+      oldPassword: req.body.oldPassword,
+      newPassword: req.body.newPassword,
+      confirmPassword: req.body.confirmPassword,
+    };
+    if (
+      !objData.oldPassword ||
+      !objData.newPassword ||
+      !objData.confirmPassword
+    ) {
+      return res.status(400).json({
+        message: "all fields are required",
+      });
+    }
+    if (objData.newPassword !== objData.confirmPassword) {
+      return res.status(400).json({
+        message: "confirm password does not match new password",
+      });
+    }
+    const valid = await bcrypt.compare(req.body.oldPassword, user.PasswordHash);
+
+    if (!valid) {
+      return res.status(400).json({
+        message: "Old Password is incorrect...",
+      });
+    }
+
+    bcrypt.hash(objData.newPassword, saltRounds, async function (err, hash) {
+      // TODO: Change Old Password with New Password
+      const updatedUser = await prisma.users.update({
+        where: {
+          Id: user.Id,
+        },
+        data: {
+          PasswordHash: hash,
+        },
+      });
+      if (updatedUser) {
+        return res.status(201).json({
+          message: "your password has been change successfully !!! ",
+        });
+      } else {
+        return res.status(400).json({
+          message: "SomeThing Bad Happpened",
+        });
+      }
+    });
   },
 };
 

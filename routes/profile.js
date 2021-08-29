@@ -17,21 +17,28 @@ const upload = multer({ storage: storage });
 
 router.get(
   "/me",
-  authPage(["Seller", "Buyer", "Admin"]),
+  authPage(["HouseOwner", "User", "Admin"]),
   profileController.getUserInfo
 );
 
 router.put(
   "/me/edit",
-  authPage(["Seller", "Buyer", "Admin"]),
+  authPage(["HouseOwner", "User", "Admin"]),
   profileController.updateUserInfo
 );
 
 router.put(
   "/me/edit/avatar",
   upload.single("avatar"),
-  authPage(["Seller", "Buyer", "Admin"]),
+  authPage(["HouseOwner", "User", "Admin"]),
   profileController.changeAvatar
+);
+
+router.put(
+  "/me/edit/password",
+  upload.single("avatar"),
+  authPage(["HouseOwner", "User", "Admin"]),
+  profileController.changePassword
 );
 
 module.exports = router;
