@@ -8,7 +8,7 @@ const router = express.Router();
 router.get("/", feedBackController.getAllFeedBack);
 router.post(
   "/create",
-  authPage(["Seller", "Buyer"]),
+  authPage(["User", "HouseOwner"]),
   feedBackController.createNewFeedBack
 );
 

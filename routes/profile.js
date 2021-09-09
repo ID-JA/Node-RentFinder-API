@@ -36,7 +36,6 @@ router.put(
 
 router.put(
   "/me/edit/password",
-  upload.single("avatar"),
   authPage(["HouseOwner", "User", "Admin"]),
   profileController.changePassword
 );

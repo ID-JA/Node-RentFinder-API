@@ -13,17 +13,20 @@ const feedBackController = {
 
     const feedbacks = await prisma.feedback.findMany();
     const allFeedBacks = [];
-    const user = await prisma.users.findFirst({
-      where: {
-        Id: userInfo.Id,
-      },
-    });
+    
     for (let i = 0; i < feedbacks.length; i++) {
       const element = feedbacks[i];
+      const user = await prisma.users.findFirst({
+        where: {
+          Id: element.UserId,
+        },
+      });
       allFeedBacks.push({
         ...element,
         UserId: user.Id,
         Avatar: user.Avatar,
+        FirstName: user.FirstName,
+        LastName: user.LastName,
       });
     }
     return res.status(200).json(allFeedBacks);
@@ -55,9 +58,7 @@ const feedBackController = {
           data: {
             Content: objData.Content,
             Value: objData.Value,
-            Avatar: user.Avatar,
-            FirstName: user.FirstName,
-            LastName: user.LastName,
+            UserId: user.Id,
           },
         });
         if (!createdFeedBack) {

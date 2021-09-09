@@ -36,7 +36,7 @@ const announcementController = {
     res.status(200).json(announcements);
   },
 
-  // ! =============================== GET ANNOUNCEMENT OF USER =====================================
+  // ! =============================== GET ANNOUNCEMENT OF USER =================================
   async getAnnouncementsOfUser(req, res) {
     // TODO: GET User From token
     const token =
@@ -63,7 +63,7 @@ const announcementController = {
     res.status(200).json(announcementsOfUser);
   },
 
-  // ! =============================== GET ANNOUNCEMENT BY ID  =====================================
+  // ! =============================== GET ANNOUNCEMENT BY ID  ==================================
   async getAnnouncementById(req, res) {
     const announcementId = parseInt(req.params.Id);
     const announcement = await prisma.announcements.findUnique({
@@ -110,7 +110,7 @@ const announcementController = {
     });
   },
 
-  // ! =============================== DELETE ANNOUNCEMENT=====================================
+  // ! =============================== DELETE ANNOUNCEMENT =======================================
   async deleteAnnouncement(req, res) {
     // TODO: GET User From token
     const token =
@@ -240,7 +240,7 @@ const announcementController = {
     });
   },
 
-  // ! =============================== CREATE NEW ANNOUNCEMENT=====================================
+  // ! =============================== CREATE NEW ANNOUNCEMENT=================================
   async createAnnouncement(req, res) {
     const token =
       req.body.token || req.query.token || req.headers.authorization;
@@ -367,7 +367,7 @@ const announcementController = {
     }
   },
 
-  // ! ================================ Upload Images of Announcement =====================================
+  // ! =========================== Upload Images of Announcement ============================
   async uploadImages(req, res) {
     try {
       const token =
@@ -423,6 +423,18 @@ const announcementController = {
       console.log(error);
       return res.status(500).json({
         message: "you should upload only 3 images",
+      });
+    }
+  },
+
+  async deleteAnnouncementByAdmin(req, res) {
+    // TODO: GET User From token
+    const token =
+      req.body.token || req.query.token || req.headers.authorization;
+    const announcementId = req.params.Id;
+    if (!token) {
+      return res.status(400).json({
+        message: "Invalid Token",
       });
     }
   },
